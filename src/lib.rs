@@ -185,6 +185,9 @@ pub mod deck {
     }
 
     impl Deck {
+        pub fn size(&self) -> u8 {
+            return 52 - self.drawn_cards;
+        }
         pub fn draw_shuffled(&mut self) -> Result<Card, &str> {
             if self.drawn_cards < 52 {
                 let mut rng = rand::thread_rng();
@@ -193,7 +196,7 @@ pub mod deck {
                 while self.in_play[num as usize] {
                     num = rng.gen_range(0..51);
                 }
-            
+
                 self.in_play[num as usize] = true;
                 return Ok(Card {
                     suit: Suit::from_index((num / 13) as usize).unwrap(),
@@ -222,7 +225,7 @@ pub mod deck {
             let card_index = card.suit.index() * 13 + card.rank.index();
             self.in_play[card_index] = false;
             if self.drawn_cards > 0 {
-            self. drawn_cards -= 1;
+                self.drawn_cards -= 1;
             }   
         }
 
@@ -231,5 +234,68 @@ pub mod deck {
                 self.in_play[i] = false;
             }
         }
+    }
+
+    #[test]
+    fn shuffle_draw() {
+        let mut deck = Deck::default();
+        let mut drawn_cards = [false; 52];
+
+        for _i in 0..51 {
+            match deck.draw_shuffled() {
+                Ok(c) => {
+                    let index = (c.suit.index() * 13) + (c.rank.index());
+                    drawn_cards[index] = true;
+                },
+                Err(e) => { panic!("Error: {}", e); }
+            };
+        }
+
+        for i in 0..51 {
+            if !drawn_cards[i] {
+                panic!("Index: {} wasn't drawn", i);
+            }
+        }
+    }
+
+    #[test]
+    fn unshuffled_draw() {
+        let mut deck = Deck::default();
+        let mut drawn_cards = [false; 52];
+
+        for _i in 0..51 {
+            match deck.draw_unshuffled() {
+                Ok(c) => {
+                    let index = (c.suit.index() * 13) + (c.rank.index());
+                    drawn_cards[index] = true;
+                },
+                Err(e) => { panic!("Error: {}", e); }
+            };
+        }
+
+        for i in 0..51 {
+            if !drawn_cards[i] {
+                panic!("Index: {} wasn't drawn", i);
+            }
+        }
+    }
+
+    #[test]
+    fn card_return_test() {
+        let mut deck  = Deck::default();
+        let mut cards: Vec<Card> = Vec::new();
+
+        for _i in 0..51 {
+            match deck.draw_unshuffled() {
+                Ok(c) => {cards.push(c);},
+                Err(e) => {panic!("{}", e);}
+            }
+        }
+
+        for i in cards {
+            deck.return_card(i);
+        }
+
+        assert!(deck.size() == 52);
     }
 }
