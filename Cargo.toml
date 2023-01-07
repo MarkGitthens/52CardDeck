@@ -5,6 +5,7 @@ edition = "2021"
 repository = "https://github.com/MarkGitthens/52CardDeck"
 license = "MIT"
 readme = "README.md"
+description = "Library that provides basic functionality for interacting with a standard 52 size deck of playing cards."
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
